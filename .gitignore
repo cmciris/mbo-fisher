@@ -1,0 +1,31 @@
+# Object file
+*.o
+
+# Ada Library Information
+*.ali
+
+# macOS .DS_Store
+.DS_Store
+
+# NAS2020 added file
+._*
+
+# Pycache
+__pycache__/
+
+# Visualization file
+*.jpg
+*.pdf
+*.png
+
+# Dataset file
+*.npy
+*.meta
+*.tar.gz
+datasets/
+
+# Log file
+run/
+tensorboard/
+checkpoints/
+logs/

@@ -1,0 +1,24 @@
+exp: gradient_ascent
+logging_dir: logs/gradient_ascent/ant
+writer_dir: run/gradient_ascent/ant
+model_dir: checkpoints/gradient_ascent/ant
+task: AntMorphology-Exact-v0
+task_relabel: false
+task_opt_channel:
+normalize_ys: true
+normalize_xs: true
+particle_lr: 0.01 #0.05 #0.01
+particle_gradient_steps: 200 #50 #200
+particle_entropy_coefficient: 0.0
+forward_model_activations: [nn.ReLU, nn.ReLU]
+forward_model_hidden_size: 2048
+forward_model_dropout_p: 0.0
+forward_model_final_tanh: false
+forward_model_lr: 0.0003
+forward_model_noise_std: 0.0
+forward_model_batch_size: 128
+forward_model_val_size: 500 #200
+forward_model_epochs: 20 #100
+forward_model_load: false
+evaluation_samples: 128
+fast: false
