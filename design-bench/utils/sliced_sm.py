@@ -738,6 +738,7 @@ class EnergyNetTrainer():
                     torch.save(states, os.path.join(self.model_dir, 'sm_checkpoint_{}.pth'.format(step)))
                     torch.save(states, os.path.join(self.model_dir, 'sm_checkpoint.pth'))
         
+        states = [energy.state_dict(), optimizer.state_dict()]
         torch.save(states, os.path.join(self.model_dir, 'sm_checkpoint.pth'))
         return
         
