@@ -10,6 +10,7 @@ import time
 from utils.logger import Logger
 from utils.data import StaticGraphTask, build_pipeline
 from utils.sliced_sm import MLPEnergy, EnergyNetTrainer
+from utils.maf import build_density_model, DensityTrainer
 from utils.gmm import GMM, GMMTrainer
 
 import pdb
@@ -84,6 +85,7 @@ def fisher(**config):
     forward_model_epochs=config.get('forward_model_epochs')
     forward_model_load=config.get('forward_model_load')
     
+    behavior_model_type=config.get('behavior_model_type', 'ebm')
     behavior_model_activations=config.get('behavior_model_activations')
     behavior_model_optim=config.get('behavior_model_optim')
     behavior_model_lr=config.get('behavior_model_lr', 1e-4)
@@ -169,22 +171,47 @@ def fisher(**config):
         val_size=forward_model_val_size
     )
 
-    # make a neural network to mimick the offline data density
-    behavior_model = MLPEnergy(
-        input_shape=input_shape,
-        act=behavior_model_activations,
-    ).to(device)
+    if behavior_model_type == 'ebm':
+        # make a neural network to mimick the offline data density
+        behavior_model = MLPEnergy(
+            input_shape=input_shape,
+            act=behavior_model_activations,
+        ).to(device)
+        # make a trainer for the density model
+        behavior_model_trainer = EnergyNetTrainer(energy_model=behavior_model,
+                                                energy_model_optim=behavior_model_optim,
+                                                energy_model_lr=behavior_model_lr,
+                                                energy_model_weight_decay=behavior_model_weight_decay,
+                                                energy_model_optim_beta1=behavior_model_optim_beta1,
+                                                energy_model_noise_std=behavior_model_noise_std,
+                                                energy_model_resume_training=behavior_model_load,
+                                                energy_model_algo="ssm",
+                                                energy_model_dir=model_dir)
+        
+    elif behavior_model_type == 'autoregressive':
+        # make a neural network to mimick the offline data density
+        behavior_model = build_density_model(
+            input_shape=input_shape,
+            activation_fn=behavior_model_activations,
+            hidden_size=2048,
+            n_hidden=2,
+            algo='made',
+        ).to(device)
+        # make a trainer for the density model
+        behavior_model_trainer = DensityTrainer(density_model=behavior_model,
+                                                density_model_optim=behavior_model_optim,
+                                                density_model_lr=behavior_model_lr,
+                                                density_model_weight_decay=behavior_model_weight_decay,
+                                                density_model_optim_beta1=behavior_model_optim_beta1,
+                                                density_model_noise_std=behavior_model_noise_std,
+                                                density_model_resume_training=behavior_model_load,
+                                                density_model_dir=model_dir)
 
-    # make a trainer for the density model
-    behavior_model_trainer = EnergyNetTrainer(energy_model=behavior_model,
-                                              energy_model_optim=behavior_model_optim,
-                                              energy_model_lr=behavior_model_lr,
-                                              energy_model_weight_decay=behavior_model_weight_decay,
-                                              energy_model_optim_beta1=behavior_model_optim_beta1,
-                                              energy_model_noise_std=behavior_model_noise_std,
-                                              energy_model_resume_training=behavior_model_load,
-                                              energy_model_algo="ssm",
-                                              energy_model_dir=model_dir)
+    elif behavior_model_type == 'gmm':
+        behavior_model = GMM(input_shape, n_components=50).to(device)
+        
+    else:
+        raise NotImplementedError('Behavior model {} not understood.'.format(behavior_model_type))
     
     # train the behavioral density model
     behavior_model_trainer.launch(train_data, validate_data, logger, behavior_model_epochs, n_iters=50001, snapshot_freq=5000)
