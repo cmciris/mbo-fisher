@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as D
+import torch.optim
 import torchvision.transforms as T
 from torchvision.utils import save_image
 from torch.utils.data import DataLoader, TensorDataset, Dataset
@@ -811,9 +812,10 @@ class DensityTrainer():
                  density_model,
                  density_model_optim,
                  density_model_lr,
-                 density_model_weight_decay,
+                 density_model_weight_decay=1e-6,
                  density_model_optim_beta1=0.9,
                  density_model_noise_std=0.0,
+                 density_model_cond_label_size=None,
                  density_model_resume_training=False,
                  density_model_dir="checkpoints/fisher") -> None:
         self.model = density_model
@@ -822,6 +824,7 @@ class DensityTrainer():
         self.weight_decay = density_model_weight_decay
         self.beta1 = density_model_optim_beta1
         self.noise_std = density_model_noise_std
+        self.cond_label_size = density_model_cond_label_size
 
         self.resume_training = density_model_resume_training
         self.model_dir = density_model_dir
@@ -844,11 +847,90 @@ class DensityTrainer():
                n_epochs,
                n_iters=None,
                snapshot_freq=None):
+        
+        test_loader = validate_data
+        test_iter = iter(test_loader)
+
         # model
-        pass
+        model = self.model
+        optimizer = self.get_optimizer(model.parameters())
 
+        if self.resume_training:
+            states = torch.load(os.path.join(self.model_dir, 'autoregressive_checkpoint.pth'))
+            model.load_state_dict(states[0])
+            optimizer.load_state_dict(states[1])
 
-    
+            return
+
+        flag = False
+        step = 0
+
+        sigma = self.noise_std
+
+        for epoch in range(n_epochs):
+            if flag: break
+            for i, (X, y) in enumerate(train_data):
+                model.train()
+                step += 1
+
+                X = X + torch.randn_like(X) * sigma
+                
+                # check if labeled dataset
+                if self.cond_label_size is None:
+                    y = None
+                else:
+                    y = y.view(y.shape[0], -1)
+                    assert self.cond_label_size == y.shape[-1], "Check the cond_label_size"
+
+                X = X.view(X.shape[0], -1)
+                pdb.set_trace() # check if self.cond_label_size = False
+                loss = - model.log_prob(X, y if self.cond_label_size else None).mean()
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                logger.logger.info("epoch: {}, step: {}, total_step: {}, loss: {}, sigma: {}".format(epoch, i, step, loss.item(), sigma))
+
+                if step >= n_iters:
+                    flag = True
+                    break
+
+                if step % 100 == 0:
+                    model.eval()
+                    try:
+                        test_X, test_y = next(test_iter)
+                        if self.cond_label_size is None:
+                            test_y = None
+                        else:
+                            test_y = test_y.view(test_y.shape[0], -1)
+                            assert self.cond_label_size == test_y.shape[-1], "Check the cond_label_size"
+                    except StopIteration:
+                        test_iter = iter(test_loader)
+                        test_X, test_y = next(test_iter)
+                        if self.cond_label_size is None:
+                            test_y = None
+                        else:
+                            test_y = test_y.view(test_y.shape[0], -1)
+                            assert self.cond_label_size == test_y.shape[-1], "Check the cond_label_size"
+                    
+                    test_X += torch.randn_like(test_X) * self.noise_std
+                    test_X = test_X.view(test_X.shape[0], -1)
+                    test_loss = - model.log_prob(test_X, y if self.cond_label_size else None).mean()
+
+                    logger.logger.info("epoch: {}, step: {}, total_step: {}, [test_loss]: {}, sigma: {}".format(epoch, i, step, test_loss.item(), self.noise_std))
+                
+                if step % snapshot_freq == 0:
+                    states = [
+                        model.state_dict(),
+                        optimizer.state_dict()
+                    ]
+                    torch.save(states, os.path.join(self.model_dir, 'autoregressive_checkpoint_{}.pth'.format(step)))
+                    torch.save(states, os.path.join(self.model_dir, 'autoregressive_checkpoint.pth'))
+        
+        states = [model.state_dict(), optimizer.state_dict()]
+        torch.save(states, os.path.join(self.model_dir, 'autoregressive_checkpoint.pth'))
+        return
 
 # --------------------
 # Run

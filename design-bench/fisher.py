@@ -189,6 +189,8 @@ def fisher(**config):
                                                 energy_model_dir=model_dir)
         
     elif behavior_model_type == 'autoregressive':
+        # classification labels, int, to be one-hot in autoregressive model
+        behavior_model_cond_label_size = None
         # make a neural network to mimick the offline data density
         behavior_model = build_density_model(
             input_shape=input_shape,
@@ -196,6 +198,7 @@ def fisher(**config):
             hidden_size=2048,
             n_hidden=2,
             algo='made',
+            cond_label_size=None,
         ).to(device)
         # make a trainer for the density model
         behavior_model_trainer = DensityTrainer(density_model=behavior_model,
@@ -204,11 +207,16 @@ def fisher(**config):
                                                 density_model_weight_decay=behavior_model_weight_decay,
                                                 density_model_optim_beta1=behavior_model_optim_beta1,
                                                 density_model_noise_std=behavior_model_noise_std,
+                                                density_model_cond_label_size=behavior_model_cond_label_size,
                                                 density_model_resume_training=behavior_model_load,
                                                 density_model_dir=model_dir)
 
     elif behavior_model_type == 'gmm':
         behavior_model = GMM(input_shape, n_components=50).to(device)
+
+    elif behavior_model_type == 'diffussion':
+        # behavior_model = Diff(input_shape).to(device)
+        pass
         
     else:
         raise NotImplementedError('Behavior model {} not understood.'.format(behavior_model_type))
