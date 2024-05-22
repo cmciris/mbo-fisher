@@ -212,23 +212,22 @@ def fisher(**config):
                                                 density_model_dir=model_dir)
 
     elif behavior_model_type == 'gmm':
-        behavior_model = GMM(input_shape, n_components=50).to(device)
+        behavior_model = GMM(input_shape=input_shape, n_components=10).to(device)
+        behavior_model_trainer = GMMTrainer(gmm=behavior_model, model_load=behavior_model_load, model_dir=model_dir)
 
     elif behavior_model_type == 'diffussion':
         # behavior_model = Diff(input_shape).to(device)
+        # behavior_model_trainer = DiffTrainer()
         pass
         
     else:
         raise NotImplementedError('Behavior model {} not understood.'.format(behavior_model_type))
+    logger.logger.info("Density model created at device: {}".format(device))
     
     # train the behavioral density model
     behavior_model_trainer.launch(train_data, validate_data, logger, behavior_model_epochs, n_iters=50001, snapshot_freq=5000)
     logp_mean, logp_std = behavior_model.prepare(x=train_data, is_dataloader=True)
     logger.logger.info("Density model scale mean: {}, standard_dev: {}".format(logp_mean, logp_std))
-    
-    # behavior_model = GMM(input_shape=input_shape, n_components=10).to(device)
-    # behavior_model_trainer = GMMTrainer(gmm=behavior_model, model_load=behavior_model_load, model_dir=model_dir)
-    logger.logger.info("Density model created at device: {}".format(device))
     
     # make a neural network to predict scores
     forward_model = build_forward_model(
