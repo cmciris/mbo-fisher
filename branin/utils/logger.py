@@ -29,7 +29,7 @@ def get_logger(logging_dir, module_name, logging_filename='info.log', level=logg
     return logger
 
 class Logger(object):
-    def __init__(self, logging_dir, module_name, logging_filename) -> None:
+    def __init__(self, logging_dir, module_name, logging_filename, writer_dir) -> None:
         """
         Creates a logging interface to a tensorboard file for visualizing in the tensorboard web interface; note that mean, max, min, and std are recorded
         
@@ -44,8 +44,13 @@ class Logger(object):
         """
 
         if not os.path.exists(logging_dir):
-            os.makedirs(logging_dir)
-        self.writer = SummaryWriter(logging_dir)
+            os.mkdir(logging_dir)
+        if writer_dir:
+            if not os.path.exists(writer_dir):
+                os.mkdir(writer_dir)
+        else:
+            writer_dir = logging_dir
+        self.writer = SummaryWriter(writer_dir)
         self.logger = get_logger(logging_dir, module_name, logging_filename)
 
     def record(self, key, value, step, percentile=False):

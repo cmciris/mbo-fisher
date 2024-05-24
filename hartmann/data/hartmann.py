@@ -5,6 +5,9 @@ import pdb
 from typing import Tuple
 
 def hartmann(x0, x1, x2):
+    """
+    f(x) = \sum_{i=1}^4 alpha_i \exp(-\sum_{j=1}^3 Aij(xj-Pij)^2)
+    """
     n_samples = x0.shape[0]
     alpha = np.array([1.0, 1.2, 3.0, 3.2])
     A = np.array([[3.0, 10, 30],
