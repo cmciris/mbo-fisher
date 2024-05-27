@@ -8,20 +8,27 @@ import pdb
 
 def branin(x0, x1):
     """
+    :param x0: B,
+    :param x1: B,
+    :return f(x0,x1): B,
     minimize, three global minima
     f(x) = a(x1-bx0^2) + cx0 - r)^2 + s(1-t)cos(x1) + s
     a = 1, b = 5.1/(4pi^2), c = 5/pi, r = 6, s = 10, t = 1/(8pi)
     x0 in [-5, 10], x1 in [0, 15]
     """
     # b, c, t = 0.12918450914398066, 1.5915494309189535, 0.039788735772973836
-    b, c, t = 5.1/(4. * np.pi)**2, 5./np.pi, 1/(8. * np.pi)
-    u = x1 - b * x0 ** 2 + c * x0 - 6
+    # pdb.set_trace()
+    b, c, t = 5.1/(4. * np.pi**2), 5./np.pi, 1/(8. * np.pi)
+    u = x1 - b * (x0 ** 2) + (c * x0) - 6
     r = 10. * (1. - t) * np.cos(x0) + 10.
     y = u ** 2 + r
     return -y
 
 def branin_hoo(x0, x1):
     """
+    :param x0: B,
+    :param x1: B,
+    :return f(x0,x1): B,
     modifications and alternate forms
     Picheny et al. (2012) on [0, 1]^2
     https://www.sfu.ca/~ssurjano/branin.html
@@ -33,10 +40,10 @@ def branin_hoo(x0, x1):
     y = (1/51.95) * (u ** 2 + r)
     return -y
 
-def create_mesh(x0_d, x1_d, n, alter=False):
+def create_uniform(x0_d, x1_d, n, alter=False):
     func = lambda x0, x1: branin_hoo(x0, x1) if alter else branin(x0, x1)
-    x0 = np.random.uniform(x0_d[0], x0_d[1], n) # B,
-    x1 = np.random.uniform(x1_d[0], x1_d[1], n)
+    x0 = np.random.uniform(x0_d[0], x0_d[1], n).clip(-5, 10) # B,
+    x1 = np.random.uniform(x1_d[0], x1_d[1], n).clip(0, 15)
     y = func(x0, x1)
 
     x = np.concatenate([x0.reshape(-1, 1), x1.reshape(-1, 1)], axis=-1).reshape(-1, 2)
@@ -46,7 +53,11 @@ def create_mesh(x0_d, x1_d, n, alter=False):
 def create_multivariate_normal(x0, x1, cov, n, alter=False):
     func = lambda x0, x1: branin_hoo(x0, x1) if alter else branin(x0, x1)
     x = np.random.multivariate_normal([x0, x1], cov, n)
-    y = func(x[:,0], x[:,1])
+    x0 = x[:,0].clip(-5, 10)
+    x1 = x[:,1].clip(0, 15)
+    y = func(x0, x1)
+
+    x = np.concatenate([x0.reshape(-1, 1), x1.reshape(-1, 1)], axis=-1).reshape(-1, 2)
     y = y.reshape(-1, 1)
     return x, y
 
@@ -58,7 +69,7 @@ def random_sample(x0_domains: List[Tuple],
     
     xs, ys = [], []
     for x0_d, x1_d, n in zip(x0_domains, x1_domains, n_samples):
-        x, y = create_mesh(x0_d, x1_d, n, alter)
+        x, y = create_uniform(x0_d, x1_d, n, alter)
         xs.append(x)
         ys.append(y)
     return np.concatenate(xs, axis=0), np.concatenate(ys, axis=0)
@@ -109,10 +120,10 @@ def shuffle_numpy(x: np.ndarray, y: np.ndarray, seed=2024) -> Tuple[np.ndarray, 
 def main():
     os.makedirs('./datasets', exist_ok=True)
 
-    # x, y = random_sample([(-5, 0), (8, 10)], [(0, 5), (13, 15)], [100, 50])
-    x0_domains, x1_domains = [(-5, 0), (8, 10)], [(0, 5), (13, 15)]
-    # x, y = normal_sample([(0, 1), (5, 10)], [[[1., 0.], [0., 1.]], [[4., 0.], [0., 9.]]], [50, 100])
-    means, covs = [(0, 1), (5, 10)], [[[1., 0.], [0., 1.]], [[4., 0.], [0., 9.]]]
+    # x, y = random_sample([(-3, 3), (0, 15), (2, 10), (-4, 0)], [(1, 7), (5, 15), (0, 4), (5, 15)], [5000, 5000, 5000, 5000])
+    x0_domains, x1_domains = [(-4, 1), (2, 10)], [(0, 13), (2, 15)]
+    # x, y = normal_sample([(0, 4), (5, 10), (6, 2), (-2, 10)], [[[2., 0.], [0., 2.]], [[4., 0.], [0., 9.]], [[9., 0.], [0., 1.]], [[1., 0.], [0., 9.]]], [5000, 5000, 5000, 5000])
+    means, covs = [(0, 4), (5, 10)], [[[2., 0.], [0., 2.]], [[4., 0.], [0., 9.]]]
     n_samples = [6000, 6000]
 
     for method in ['random', 'normal']:
@@ -133,11 +144,14 @@ def main():
             print(task_x.shape, task_y.shape)
             np.save(f'./datasets/{method}_x_{task}.npy', task_x)
             np.save(f'./datasets/{method}_y_{task}.npy', task_y)
-
-    # data = init_data(n_points=20000)
-    # print(data['x'].shape, data['y'].shape)
-    # np.save('./x.npy', data['x'])
-    # np.save('./y.npy', data['y'])
+    
+    # full screen manifold
+    # x0_domains, x1_domains = [(-5, 10)], [(0, 15)]
+    # n_samples = [20000]
+    # x, y = random_sample(x0_domains, x1_domains, n_samples)
+    # print(x.shape, y.shape)
+    # np.save(f'./datasets/x.npy', x)
+    # np.save(f'./datasets/y.npy', y)
 
 if __name__ == "__main__":
     main()
