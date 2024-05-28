@@ -29,22 +29,42 @@ def scatterplot(x: np.ndarray, save_path):
     scatter_fig.savefig(save_path, dpi=400)
     fig.cla()
 
-def plot_background(fig_dir, is_subfigure=True):
-    fig_save_path = os.path.join(fig_dir, "manifold.jpg")
+def plot_background_2d(fig_dir, is_subfigure=True):
+    fig_save_path = os.path.join(fig_dir, "manifold_2d.jpg")
     x = np.linspace(-5, 10, 150)
     y = np.linspace(0, 15, 150)
-    # x = np.linspace(0, 1, 150)
-    # y = np.linspace(0, 1, 150)
     x, y = np.meshgrid(x, y)
     z = branin(x, y)
 
     # plt.contourf(x, y, z, 100, cmap="RdGy")
-    plt.contourf(x, y, z, 200, cmap="rainbow")
-    # plt.imshow(z, extent=[-5.0, 10.0, 0.0, 15.0], origin='lower', cmap='rainbow')
+    plt.contourf(x, y, z, 200, cmap="jet")
+    # plt.imshow(z, extent=[-5.0, 10.0, 0.0, 15.0], origin='lower', cmap='jet')
     # plt.colorbar()
     
     if not is_subfigure:
         plt.savefig(fig_save_path, dpi=400)
+        plt.clf()
+    else:
+        plt.cla()
+
+def plot_background_3d(fig_dir, is_subfigure=True):
+    fig_save_path = os.path.join(fig_dir, "manifold_3d.jpg")
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    x = np.linspace(-5, 10, 150)
+    y = np.linspace(0, 15, 150)
+    x, y = np.meshgrid(x, y)
+    z = branin(x, y)
+    surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap='jet', linewidth=0, antialiased=False)
+    ax.set_zlim3d(-350, 0)
+    # fig.colorbar(surf, shrink=0.5, aspect=5)
+    fig.colorbar(surf, shrink=0.6)
+    
+    if not is_subfigure:
+        plt.savefig(fig_save_path, dpi=400)
+        plt.clf()
+    else:
         plt.cla()
 
 def plot(data_dir, fig_dir, show='scatter' , method="random", task=None):
@@ -72,10 +92,11 @@ def main():
     fig_dir = "./figs"
     os.makedirs(fig_dir, exist_ok=True)
     
-    plot_background(fig_dir, is_subfigure=False)
+    plot_background_3d(fig_dir, is_subfigure=False)
+    # plot_background_2d(fig_dir, is_subfigure=False)
     for method in ["random", "normal"]:
         for task in [None, "easy", "medium", "hard"]:
-            plot(data_dir, fig_dir, method, task)
+            plot(data_dir, fig_dir, method=method, task=task)
 
 if __name__ == "__main__":
     main()
