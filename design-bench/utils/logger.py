@@ -43,11 +43,13 @@ class Logger(object):
             the filename on the disk to save logs to
         """
 
-        if not os.path.exists(logging_dir):
-            os.mkdir(logging_dir)
+        # if not os.path.exists(logging_dir):
+        #     os.mkdir(logging_dir)
+        os.makedirs(logging_dir, exist_ok=True)
         if writer_dir:
-            if not os.path.exists(writer_dir):
-                os.mkdir(writer_dir)
+            os.makedirs(writer_dir, exist_ok=True)
+            # if not os.path.exists(writer_dir):
+            #     os.mkdir(writer_dir)
         else:
             writer_dir = logging_dir
         self.writer = SummaryWriter(writer_dir)
