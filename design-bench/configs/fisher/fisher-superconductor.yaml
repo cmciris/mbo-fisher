@@ -7,16 +7,16 @@ task_relabel: false
 task_opt_channel:
 normalize_ys: true
 normalize_xs: true
-particle_lr: 0.05
-particle_gradient_steps: 50
+particle_lr: 0.01
+particle_gradient_steps: 200
 particle_entropy_coefficient: 0.0
-fisher_coefficient: 1.0
+fisher_coefficient: 5.0
 forward_model_activations: [nn.ReLU, nn.ReLU]
 forward_model_hidden_size: 2048
 forward_model_dropout_p: 0.0
 forward_model_final_tanh: false
-forward_model_lr: 0.0003
-forward_model_alpha: 1.0 #0.01
+forward_model_lr: 0.0001
+forward_model_beta: 0.01 #0.01
 forward_model_noise_std: 0.0
 forward_model_batch_size: 128
 forward_model_val_size: 500
