@@ -100,6 +100,8 @@ def fisher(**config):
     evaluation_samples=config.get('evaluation_samples')
     fast=config.get('fast')
     
+    # create the model directory if not exist
+    os.makedirs(model_dir, exist_ok=True)
     # create the logger and export the experiment parameters
     logging_filename, run_id = _get_log_name(**config)
     logger = Logger(logging_dir, __name__, logging_filename, writer_dir)
