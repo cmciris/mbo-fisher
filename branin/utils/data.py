@@ -6,7 +6,7 @@ import pdb
 from typing import Tuple, Any
 
 class BraninTask(object):
-    def __init__(self, data_dir, ** task_kwargs) -> None:
+    def __init__(self, data_dir, **task_kwargs) -> None:
         """
         An interface to a branin task which includes a validation set and a differentiable score functionn
         Args:
@@ -22,11 +22,18 @@ class BraninTask(object):
         self.x_opt_lb = dataset_kwargs.get('opt_lb')
 
         if task_kwargs.get('relabel', False):
-            self.x = np.load(os.path.join(data_dir, 'relabel/x.npy')).astype(np.float32)
-            self.y = np.load(os.path.join(data_dir, 'relabel/y.npy')).astype(np.float32)
+            data_dir = os.path.join(data_dir, 'relabel')
+        
+        # sampling method 'normal/random'
+        sample_method = task_kwargs.get('method', 'normal')
+        # task subset 'easy/medium/hard'
+        subset = task_kwargs.get('subset', None)
+        if subset is None:
+            self.x = np.load(os.path.join(data_dir, f'{sample_method}_x.npy')).astype(np.float32)
+            self.y = np.load(os.path.join(data_dir, f'{sample_method}_y.npy')).astype(np.float32)
         else:
-            self.x = np.load(os.path.join(data_dir, 'x.npy')).astype(np.float32)
-            self.y = np.load(os.path.join(data_dir, 'y.npy')).astype(np.float32)
+            self.x = np.load(os.path.join(data_dir, f'{sample_method}_x_{subset}.npy')).astype(np.float32)
+            self.y = np.load(os.path.join(data_dir, f'{sample_method}_y_{subset}.npy')).astype(np.float32)
 
         if self.max_samples is not None:
             self.x = self.x[:self.max_samples]
@@ -41,14 +48,11 @@ class BraninTask(object):
             self.score_range = eval(task_kwargs.get('score_range', '(0, 100)'))
             self.min_max_score_scale(self.score_range)
         
-        self.x, self.y = self.clip_outliers(self.x, self.y, k=1000)
+        # self.x, self.y = self.clip_outliers(self.x, self.y, k=1000)
 
         self.is_normalize_y = False
         self.mu_y = None
         self.st_y = None
-        self.is_normalize_aux = False
-        self.mu_aux = None
-        self.st_aux = None
         self.is_normalize_x = False
         self.mu_x = None
         self.st_x = None
@@ -305,10 +309,15 @@ def build_pipeline(x, y, val_size=200, train_size=800, batch_size=128, bootstrap
     # create a training and validation split
     x = x[indices]
     y = y[indices]
-    train_end = val_size + train_size if val_size + train_size < len(x) else -1
-    train_inputs = [x[val_size:train_end], y[val_size:train_end]]
-    validate_inputs = [x[:val_size], y[:val_size]]
-    size = train_size if val_size + train_size < len(x) else x.shape[0] - val_size
+    if train_size is not None:
+        train_end = val_size + train_size if val_size + train_size < len(x) else -1
+        train_inputs = [x[val_size:train_end], y[val_size:train_end]]
+        validate_inputs = [x[:val_size], y[:val_size]]
+        size = train_size if val_size + train_size < len(x) else x.shape[0] - val_size
+    else:
+        train_inputs = [x[val_size:], y[val_size:]]
+        validate_inputs = [x[:val_size], y[:val_size]]
+        size = x.shape[0] - val_size
 
     if bootstraps > 0:
         # sample the data set with replacement
