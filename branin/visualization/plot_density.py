@@ -6,7 +6,7 @@ import pdb
 
 sys.path.append("../")
 # print(sys.path)
-from utils.branin import branin, branin_hoo
+from data.branin import branin, branin_hoo
 
 
 def load_numpy(load_path: str):
@@ -88,7 +88,7 @@ def plot(data_dir, fig_dir, show='scatter' , method="random", task=None):
         raise NotImplementedError("Unknown visualization method")
 
 def main():
-    data_dir = "../utils/datasets"
+    data_dir = "../data/datasets"
     fig_dir = "./figs"
     os.makedirs(fig_dir, exist_ok=True)
     
