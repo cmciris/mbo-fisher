@@ -1,8 +1,8 @@
 exp: fisher
-logging_dir: logs/fisher/superconductor
-writer_dir: run/fisher/superconductor
-model_dir: checkpoints/fisher/superconductor
-task: Superconductor-RandomForest-v0
+logging_dir: logs/fisher/tfbind8
+writer_dir: run/fisher/tfbind8
+model_dir: checkpoints/fisher/tfbind8
+task: TFBind8-Exact-v0
 task_relabel: false
 task_opt_channel:
 normalize_ys: true
@@ -10,13 +10,13 @@ normalize_xs: true
 particle_lr: 0.01
 particle_gradient_steps: 200
 particle_entropy_coefficient: 0.0
-fisher_coefficient: 10.0
+fisher_coefficient: 5.0
 forward_model_activations: [nn.ReLU, nn.ReLU]
 forward_model_hidden_size: 2048
 forward_model_dropout_p: 0.0
 forward_model_final_tanh: false
 forward_model_lr: 0.0001 #0.0003
-forward_model_beta: 0.1 #0.01
+forward_model_beta: 0.01 #0.01
 forward_model_noise_std: 0.0
 forward_model_batch_size: 128
 forward_model_val_size: 500
@@ -28,7 +28,7 @@ behavior_model_optim: Adam
 behavior_model_lr: 0.001
 behavior_model_weight_decay: 0.000
 behavior_model_optim_beta1: 0.9
-behavior_model_noise_std: 0.01 #0.0001
+behavior_model_noise_std: 0.0001 #0.01 #0.0001
 behavior_model_epochs: 20
 behavior_model_load: true
 evaluation_samples: 128

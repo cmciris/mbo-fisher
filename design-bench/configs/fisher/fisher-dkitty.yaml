@@ -1,8 +1,8 @@
 exp: fisher
-logging_dir: logs/fisher/superconductor
-writer_dir: run/fisher/superconductor
-model_dir: checkpoints/fisher/superconductor
-task: Superconductor-RandomForest-v0
+logging_dir: logs/fisher/dkitty
+writer_dir: run/fisher/dkitty
+model_dir: checkpoints/fisher/dkitty
+task: DKittyMorphology-Exact-v0
 task_relabel: false
 task_opt_channel:
 normalize_ys: true
@@ -10,7 +10,7 @@ normalize_xs: true
 particle_lr: 0.01
 particle_gradient_steps: 200
 particle_entropy_coefficient: 0.0
-fisher_coefficient: 10.0
+fisher_coefficient: 5.0
 forward_model_activations: [nn.ReLU, nn.ReLU]
 forward_model_hidden_size: 2048
 forward_model_dropout_p: 0.0
@@ -30,6 +30,6 @@ behavior_model_weight_decay: 0.000
 behavior_model_optim_beta1: 0.9
 behavior_model_noise_std: 0.01 #0.0001
 behavior_model_epochs: 20
-behavior_model_load: true
+behavior_model_load: false
 evaluation_samples: 128
 fast: false
