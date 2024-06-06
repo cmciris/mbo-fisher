@@ -240,6 +240,7 @@ if __name__ == "__main__":
         print(task)
         config['task'] = task
         x, y = dataset(**config)
+        pdb.set_trace()
 
         # gmm fit and samples
         gmm_samples, _, _ = gmm_fit_sample(x)

@@ -172,7 +172,8 @@ class Fisher(nn.Module):
             logmu = self.behavior_model.scaled_log_prob(x)
         # pdb.set_trace()
         pred = offset + self.forward_model_beta * logmu
-        mse_loss = F.mse_loss(y, pred, reduce=False)  # reduction = mean
+        # mse_loss = F.mse_loss(y, pred, reduce=False)  # reduction = 'none'
+        mse_loss = F.mse_loss(y, pred, reduction='none')  # B, 1
 
         offset.backward(torch.ones_like(offset), create_graph=True, retain_graph=True)
         grad = x.grad

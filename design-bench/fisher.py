@@ -96,7 +96,9 @@ def fisher(**config):
     # behavior_model_val_size=config.get('behavior_model_val_size')
     behavior_model_epochs=config.get('behavior_model_epochs')
     behavior_model_load=config.get('behavior_model_load', False)
-
+    behavior_model_max_n_iters=config.get('behavior_model_max_n_iters', 50001)
+    behavior_model_snap_freq=config.get('behavior_model_snap_freq', 5000)
+    
     evaluation_samples=config.get('evaluation_samples')
     fast=config.get('fast')
     
@@ -227,7 +229,7 @@ def fisher(**config):
     logger.logger.info("Density model created at device: {}".format(device))
     
     # train the behavioral density model
-    behavior_model_trainer.launch(train_data, validate_data, logger, behavior_model_epochs, n_iters=50001, snapshot_freq=5000)
+    behavior_model_trainer.launch(train_data, validate_data, logger, behavior_model_epochs, n_iters=behavior_model_max_n_iters, snapshot_freq=behavior_model_snap_freq)
     logp_mean, logp_std = behavior_model.prepare(x=train_data, is_dataloader=True)
     logger.logger.info("Density model scale mean: {}, standard_dev: {}".format(logp_mean, logp_std))
     
