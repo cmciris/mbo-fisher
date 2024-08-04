@@ -23,6 +23,7 @@ __pycache__/
 *.meta
 *.tar.gz
 datasets/
+design-bench/data
 
 # Log file
 run/

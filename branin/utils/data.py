@@ -25,9 +25,9 @@ class BraninTask(object):
             data_dir = os.path.join(data_dir, 'relabel')
         
         # sampling method 'normal/random'
-        sample_method = task_kwargs.get('method', 'normal')
+        sample_method = dataset_kwargs.get('method', 'normal')
         # task subset 'easy/medium/hard'
-        subset = task_kwargs.get('subset', None)
+        subset = dataset_kwargs.get('subset', None)
         if subset is None:
             self.x = np.load(os.path.join(data_dir, f'{sample_method}_x.npy')).astype(np.float32)
             self.y = np.load(os.path.join(data_dir, f'{sample_method}_y.npy')).astype(np.float32)
