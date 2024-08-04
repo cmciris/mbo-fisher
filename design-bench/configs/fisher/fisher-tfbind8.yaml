@@ -8,7 +8,7 @@ task_opt_channel:
 normalize_ys: true
 normalize_xs: true
 particle_lr: 0.01
-particle_gradient_steps: 200
+particle_gradient_steps: 250
 particle_entropy_coefficient: 0.0
 fisher_coefficient: 10.0
 forward_model_activations: [nn.ReLU, nn.ReLU]
@@ -31,5 +31,5 @@ behavior_model_optim_beta1: 0.9
 behavior_model_noise_std: 0.0001 #0.01 #0.0001
 behavior_model_epochs: 20
 behavior_model_load: true
-evaluation_samples: 128
+evaluation_samples: 256
 fast: false

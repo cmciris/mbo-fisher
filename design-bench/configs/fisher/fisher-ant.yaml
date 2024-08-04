@@ -16,7 +16,7 @@ forward_model_hidden_size: 2048
 forward_model_dropout_p: 0.0
 forward_model_final_tanh: false
 forward_model_lr: 0.0001 #0.0003
-forward_model_beta: 0.01 #
+forward_model_beta: 0.001 #0.01 #
 forward_model_noise_std: 0.0
 forward_model_batch_size: 128
 forward_model_val_size: 500
@@ -31,5 +31,5 @@ behavior_model_optim_beta1: 0.9
 behavior_model_noise_std: 0.01 #0.0001
 behavior_model_epochs: 20
 behavior_model_load: true
-evaluation_samples: 128
+evaluation_samples: 256
 fast: false

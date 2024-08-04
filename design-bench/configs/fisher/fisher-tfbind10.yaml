@@ -11,17 +11,17 @@ normalize_xs: true
 particle_lr: 0.01 #0.05
 particle_gradient_steps: 500
 particle_entropy_coefficient: 0.0
-fisher_coefficient: 5.0
+fisher_coefficient: 1.0
 forward_model_activations: [nn.ReLU, nn.ReLU]
 forward_model_hidden_size: 2048
 forward_model_dropout_p: 0.0
 forward_model_final_tanh: false
-forward_model_lr: 0.0001
-forward_model_beta: 0.01 #0.01
+forward_model_lr: 0.0003 #0.0001
+forward_model_beta: 0.1 #0.01
 forward_model_noise_std: 0.0
 forward_model_batch_size: 128
 forward_model_val_size: 500
-forward_model_epochs: 200 #20
+forward_model_epochs: 20
 forward_model_load: false
 behavior_model_type: ebm
 behavior_model_activations: relu

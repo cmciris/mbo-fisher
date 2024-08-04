@@ -31,5 +31,5 @@ behavior_model_optim_beta1: 0.9
 behavior_model_noise_std: 0.01 #0.0001
 behavior_model_epochs: 20
 behavior_model_load: true
-evaluation_samples: 128
+evaluation_samples: 256
 fast: false
